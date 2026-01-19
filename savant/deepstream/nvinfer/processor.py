@@ -129,15 +129,15 @@ class NvInferProcessor:
             self._tensor_meta_to_outputs = nvds_infer_tensor_meta_to_outputs
             if self._model.output.converter.instance.tensor_format == TensorFormat.CuPy:
                 self._tensor_meta_to_outputs = nvds_infer_tensor_meta_to_outputs_cupy
-            self._logger.info("DIOGO - Using custom postproc!!!!!!!!!!!!!!!!!!! AAAAAAAAAAAAA")
+            # self._logger.info("DIOGO - Using custom postproc!!!!!!!!!!!!!!!!!!! AAAAAAAAAAAAA")
         elif self._is_object_model:
             self.postproc = self._process_regular_detector_output
-            self._logger.info("DIOGO - Using regular postproc!!!!!!!!!!!!!!!!!!! AAAAAAAAAAAAA")
+            # self._logger.info("DIOGO - Using regular postproc!!!!!!!!!!!!!!!!!!! AAAAAAAAAAAAA")
         elif self._is_attribute_model:
             self.postproc = self._process_regular_classifier_output
-            self._logger.info("DIOGO - Using attribute postproc!!!!!!!!!!!!!!!!!!! AAAAAAAAAAAAA")
+            # self._logger.info("DIOGO - Using attribute postproc!!!!!!!!!!!!!!!!!!! AAAAAAAAAAAAA")
         else:
-            self._logger.info("DIOGO - ELSE???? !!!!!!!!!!!!!!!!!!! AAAAAAAAAAAAA")
+            # self._logger.info("DIOGO - ELSE???? !!!!!!!!!!!!!!!!!!! AAAAAAAAAAAAA")
             self.postproc = self._process_regular_detector_output
 
     def _preprocess_object_meta(self, buffer: Gst.Buffer):
@@ -497,15 +497,15 @@ class NvInferProcessor:
         nvds_batch_meta = pyds.gst_buffer_get_nvds_batch_meta(hash(buffer))
         for nvds_frame_meta in nvds_frame_meta_iterator(nvds_batch_meta):
             for nvds_obj_meta in nvds_obj_meta_iterator(nvds_frame_meta):
-                self._logger.debug("DIOGO - Inside regular detector output loop!!!!!!!!!!!!!!!!!!! AAAAAAAAAAAAA")
+                # self._logger.debug("DIOGO - Inside regular detector output loop!!!!!!!!!!!!!!!!!!! AAAAAAAAAAAAA")
                 self._restore_object_meta(nvds_obj_meta)
                 if nvds_obj_meta.unique_component_id != self._model_uid:
                     continue
 
                 for obj in self._model.output.objects:
-                    self._logger.debug(f"DIOGO - Inside regular detector output object loop!!!!!!!!!!!!!!!!!!! AAAAAAAAAAAAA {self._element_name=} {nvds_obj_meta.class_id=} {obj.class_id=}")
+                    # self._logger.debug(f"DIOGO - Inside regular detector output object loop!!!!!!!!!!!!!!!!!!! AAAAAAAAAAAAA {self._element_name=} {nvds_obj_meta.class_id=} {obj.class_id=}")
                     if nvds_obj_meta.class_id == obj.class_id:
-                        self._logger.debug(f"DIOGO - Matched regular detector output object loop!!!!!!!!!!!!!!!!!!! AAAAAAAAAAAAA {nvds_obj_meta.class_id=} - {obj.class_id=} - {obj.label=} - {self._element_name=}")
+                        # self._logger.debug(f"DIOGO - Matched regular detector output object loop!!!!!!!!!!!!!!!!!!! AAAAAAAAAAAAA {nvds_obj_meta.class_id=} - {obj.class_id=} - {obj.label=} - {self._element_name=}")
                         obj_cls_id = MERGED_CLASSES[self._element_name].get(
                             obj.class_id
                         )
@@ -518,35 +518,35 @@ class NvInferProcessor:
                                     obj.label,
                                 )
                             nvds_obj_meta.class_id = obj_cls_id
-                        self._logger.debug(f"DIOGO - before set selection type")
+                        # self._logger.debug(f"DIOGO - before set selection type")
                         nvds_set_obj_selection_type(
                             obj_meta=nvds_obj_meta,
                             selection_type=ObjectSelectionType.REGULAR_BBOX,
                         )
-                        self._logger.debug(f"DIOGO - after set selection type")
+                        # self._logger.debug(f"DIOGO - after set selection type")
 
                         try:
-                            self._logger.debug(f"DIOGO - before set UUID")
+                            # self._logger.debug(f"DIOGO - before set UUID")
                             nvds_set_obj_uid(
                                 frame_meta=nvds_frame_meta,
                                 obj_meta=nvds_obj_meta,
                             )
-                            self._logger.debug(f"DIOGO - after set UUID")
+                            # self._logger.debug(f"DIOGO - after set UUID")
                         except UIDError:
-                            self._logger.debug(f"DIOGO - set UUID error")
+                            # self._logger.debug(f"DIOGO - set UUID error")
                             pass
-                        self._logger.debug(f"DIOGO - before set object key")
+                        # self._logger.debug(f"DIOGO - before set object key")
                         nvds_obj_meta.obj_label = build_model_object_key(
                             self._element_name, obj.label
                         )
-                        self._logger.debug(f"DIOGO - Updated regular detector output object loop!!!!!!!!!!!!!!!!!!! AAAAAAAAAAAAA {nvds_obj_meta.obj_label=} - {nvds_obj_meta.class_id=} - {obj.label=} - {self._element_name=}")
+                        # self._logger.debug(f"DIOGO - Updated regular detector output object loop!!!!!!!!!!!!!!!!!!! AAAAAAAAAAAAA {nvds_obj_meta.obj_label=} - {nvds_obj_meta.class_id=} - {obj.label=} - {self._element_name=}")
 
                         mask_params = nvds_obj_meta.mask_params
 
-                        self._logger.debug(f"DIOGO - mask {dir(mask_params)=}")
-                        self._logger.debug(f"DIOGO - mask {mask_params=}")
-                        self._logger.debug(f"DIOGO - mask {mask_params.get_mask_array().shape=}")
-                        self._logger.debug(f"DIOGO - mask {mask_params.get_mask_array()=}")
+                        # self._logger.debug(f"DIOGO - mask {dir(mask_params)=}")
+                        # self._logger.debug(f"DIOGO - mask {mask_params=}")
+                        # self._logger.debug(f"DIOGO - mask {mask_params.get_mask_array().shape=}")
+                        # self._logger.debug(f"DIOGO - mask {mask_params.get_mask_array()=}")
                         nvds_add_attr_meta_to_obj(
                             frame_meta=nvds_frame_meta,
                             obj_meta=nvds_obj_meta,
@@ -556,25 +556,6 @@ class NvInferProcessor:
                             confidence=1.0,
                         )
 
-                        # for nvds_clf_meta in nvds_clf_meta_iterator(nvds_obj_meta):
-                        #     self._logger.debug(f"DIOGO - before classifier meta loop - {nvds_clf_meta.unique_component_id=} - {self._model_uid=}")
-                        #     if nvds_clf_meta.unique_component_id != self._model_uid:
-                        #         continue
-                            
-                        #     for attr, label_info in zip(
-                        #         self._model.output.attributes,
-                        #         nvds_label_info_iterator(nvds_clf_meta),
-                        #     ):
-                        #         self._logger.debug(f"DIOGO - before add attribute meta - {attr.name=} - {label_info.result_label=}")
-                        #         nvds_add_attr_meta_to_obj(
-                        #             frame_meta=nvds_frame_meta,
-                        #             obj_meta=nvds_obj_meta,
-                        #             element_name=self._element_name,
-                        #             name=attr.name,
-                        #             value=label_info.result_label,
-                        #             confidence=label_info.result_prob,
-                        #         )
-                        #         self._logger.debug(f"DIOGO - after add attribute meta - {attr.name=} - {label_info.result_label=}") 
         self._restore_frame(buffer)
 
     def _process_regular_classifier_output(self, buffer: Gst.Buffer):
