@@ -950,11 +950,11 @@ class NvDsPipeline(GstPipeline):
         parents = {}  # video_object.id -> nvds_obj_meta.parent.object_id
         for nvds_obj_meta in nvds_obj_meta_iterator(nvds_frame_meta):
             self._logger.info('Processing object: %s', nvds_obj_meta.obj_label)
-            if nvds_obj_meta.obj_label == "":
-                # self._logger.debug('Skipping object with empty label.')
-                # continue
-                nvds_obj_meta.obj_label = "yolo_vehicle.vehicle"
-                self._logger.info('Assigned default label to object: %s', nvds_obj_meta.obj_label)
+            # if nvds_obj_meta.obj_label == "":
+            #     # self._logger.debug('Skipping object with empty label.')
+            #     # continue
+            #     nvds_obj_meta.obj_label = "yolo_vehicle.vehicle"
+            #     self._logger.info('Assigned default label to object: %s', nvds_obj_meta.obj_label)
             # collect obj attributes
             attributes = []
             for attr_meta in nvds_attr_meta_iterator(
