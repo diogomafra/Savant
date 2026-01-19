@@ -949,7 +949,7 @@ class NvDsPipeline(GstPipeline):
         nvds_object_id_map = {}  # nvds_obj_meta.object_id -> video_object.id
         parents = {}  # video_object.id -> nvds_obj_meta.parent.object_id
         for nvds_obj_meta in nvds_obj_meta_iterator(nvds_frame_meta):
-            self._logger.info('Processing object: %s', nvds_obj_meta.obj_label)
+            # self._logger.info('Processing object: %s', nvds_obj_meta.obj_label)
             # if nvds_obj_meta.obj_label == "":
             #     # self._logger.debug('Skipping object with empty label.')
             #     # continue
@@ -1008,7 +1008,7 @@ class NvDsPipeline(GstPipeline):
                 parents[obj_meta.id] = _nvds_obj_id(nvds_obj_meta.parent)
             # add obj attributes
             for attr in attributes:
-                self._logger.trace("Adding attribute to object: %s", attr)
+                #self._logger.trace("Adding attribute to object: %s", attr)
                 obj_meta.set_attribute(attr)
             if self._logger.isEnabledFor(logging.TRACE):
                 self._logger.trace(

@@ -85,6 +85,7 @@ class NvInferProcessor:
         self._is_complex_model = isinstance(self._model, NvInferComplexModel) and not isinstance(
             self._model, NvInferInstanceSegmentation
         )
+        self._is_instance_segmentation_model = isinstance(self._model, NvInferInstanceSegmentation)
         self._is_object_model = isinstance(self._model, NvInferDetector)
 
         self._model_uid = get_model_id(self._element_name)
@@ -540,20 +541,22 @@ class NvInferProcessor:
                         )
                         # self._logger.debug(f"DIOGO - Updated regular detector output object loop!!!!!!!!!!!!!!!!!!! AAAAAAAAAAAAA {nvds_obj_meta.obj_label=} - {nvds_obj_meta.class_id=} - {obj.label=} - {self._element_name=}")
 
-                        mask_params = nvds_obj_meta.mask_params
+                        if self._is_instance_segmentation_model:
+                            mask_params = nvds_obj_meta.mask_params
 
-                        # self._logger.debug(f"DIOGO - mask {dir(mask_params)=}")
-                        # self._logger.debug(f"DIOGO - mask {mask_params=}")
-                        # self._logger.debug(f"DIOGO - mask {mask_params.get_mask_array().shape=}")
-                        # self._logger.debug(f"DIOGO - mask {mask_params.get_mask_array()=}")
-                        nvds_add_attr_meta_to_obj(
-                            frame_meta=nvds_frame_meta,
-                            obj_meta=nvds_obj_meta,
-                            element_name=self._element_name,
-                            name="mask",
-                            value=",".join(map(str, mask_params.get_mask_array())),
-                            confidence=1.0,
-                        )
+                            # self._logger.debug(f"DIOGO - mask {dir(mask_params)=}")
+                            # self._logger.debug(f"DIOGO - mask {mask_params=}")
+                            # self._logger.debug(f"DIOGO - mask {mask_params.get_mask_array().shape=}")
+                            # self._logger.debug(f"DIOGO - mask {mask_params.get_mask_array()=}")
+                            nvds_add_attr_meta_to_obj(
+                                frame_meta=nvds_frame_meta,
+                                obj_meta=nvds_obj_meta,
+                                element_name=self._element_name,
+                                name="mask",
+                                value=mask_params.get_mask_array().tolist(),
+                                # value=",".join(map(str, mask_params.get_mask_array())),
+                                confidence=1.0,
+                            )
 
         self._restore_frame(buffer)
 
