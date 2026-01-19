@@ -552,6 +552,10 @@ def nvinfer_element_configurator(
             # set NMS clustering (so far only this one is supported)
             nvinfer_config['property']['cluster-mode'] = 2
 
+    # # nvinfer_config['property']['output-tensor-meta'] = 1
+    # nvinfer_config['property']['network-type'] = NvInferModelType.INSTANCE_SEGMENTATION.value
+    # nvinfer_config['property']['cluster-mode'] = 4
+
     if module_config.parameters.dev_mode:
         if model_config.input.preprocess_object_meta:
             model_config.input.preprocess_object_meta.dev_mode = True
