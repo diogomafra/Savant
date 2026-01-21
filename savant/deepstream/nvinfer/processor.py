@@ -534,7 +534,7 @@ class NvInferProcessor:
                                 obj_meta=nvds_obj_meta,
                                 element_name=self._element_name,
                                 name="mask",
-                                value=nvds_obj_meta.mask_params.get_mask_array().tolist(),
+                                value=nvds_obj_meta.mask_params.get_mask_array(),
                                 confidence=1.0,
                             )
 
