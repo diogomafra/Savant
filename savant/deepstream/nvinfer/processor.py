@@ -49,7 +49,7 @@ from savant.utils.log import get_logger
 from savant.utils.source_info import SourceInfoRegistry
 
 from .element_config import MERGED_CLASSES
-from .model import NvInferAttributeModel, NvInferComplexModel, NvInferDetector, NvInferInstanceSegmentation
+from .model import NvInferAttributeModel, NvInferComplexModel, NvInferDetector
 
 
 class NvInferProcessor:
@@ -82,10 +82,7 @@ class NvInferProcessor:
             NvInferAttributeModel, NvInferComplexModel, NvInferDetector
         ] = element.model
         self._is_attribute_model = isinstance(self._model, NvInferAttributeModel)
-        self._is_complex_model = isinstance(self._model, NvInferComplexModel) and not isinstance(
-            self._model, NvInferInstanceSegmentation
-        )
-        self._is_instance_segmentation_model = isinstance(self._model, NvInferInstanceSegmentation)
+        self._is_complex_model = isinstance(self._model, NvInferComplexModel)
         self._is_object_model = isinstance(self._model, NvInferDetector)
 
         self._model_uid = get_model_id(self._element_name)
@@ -130,15 +127,14 @@ class NvInferProcessor:
             self._tensor_meta_to_outputs = nvds_infer_tensor_meta_to_outputs
             if self._model.output.converter.instance.tensor_format == TensorFormat.CuPy:
                 self._tensor_meta_to_outputs = nvds_infer_tensor_meta_to_outputs_cupy
-            # self._logger.info("DIOGO - Using custom postproc!!!!!!!!!!!!!!!!!!! AAAAAAAAAAAAA")
+
         elif self._is_object_model:
             self.postproc = self._process_regular_detector_output
-            # self._logger.info("DIOGO - Using regular postproc!!!!!!!!!!!!!!!!!!! AAAAAAAAAAAAA")
+
         elif self._is_attribute_model:
             self.postproc = self._process_regular_classifier_output
-            # self._logger.info("DIOGO - Using attribute postproc!!!!!!!!!!!!!!!!!!! AAAAAAAAAAAAA")
-        else:
-            # self._logger.info("DIOGO - ELSE???? !!!!!!!!!!!!!!!!!!! AAAAAAAAAAAAA")
+
+        elif self._is_complex_model:
             self.postproc = self._process_regular_detector_output
 
     def _preprocess_object_meta(self, buffer: Gst.Buffer):
@@ -497,15 +493,12 @@ class NvInferProcessor:
         nvds_batch_meta = pyds.gst_buffer_get_nvds_batch_meta(hash(buffer))
         for nvds_frame_meta in nvds_frame_meta_iterator(nvds_batch_meta):
             for nvds_obj_meta in nvds_obj_meta_iterator(nvds_frame_meta):
-                # self._logger.debug("DIOGO - Inside regular detector output loop!!!!!!!!!!!!!!!!!!! AAAAAAAAAAAAA")
                 self._restore_object_meta(nvds_obj_meta)
                 if nvds_obj_meta.unique_component_id != self._model_uid:
                     continue
 
                 for obj in self._model.output.objects:
-                    # self._logger.debug(f"DIOGO - Inside regular detector output object loop!!!!!!!!!!!!!!!!!!! AAAAAAAAAAAAA {self._element_name=} {nvds_obj_meta.class_id=} {obj.class_id=}")
                     if nvds_obj_meta.class_id == obj.class_id:
-                        # self._logger.debug(f"DIOGO - Matched regular detector output object loop!!!!!!!!!!!!!!!!!!! AAAAAAAAAAAAA {nvds_obj_meta.class_id=} - {obj.class_id=} - {obj.label=} - {self._element_name=}")
                         obj_cls_id = MERGED_CLASSES[self._element_name].get(
                             obj.class_id
                         )
@@ -518,43 +511,29 @@ class NvInferProcessor:
                                     obj.label,
                                 )
                             nvds_obj_meta.class_id = obj_cls_id
-                        # self._logger.debug(f"DIOGO - before set selection type")
                         nvds_set_obj_selection_type(
                             obj_meta=nvds_obj_meta,
                             selection_type=ObjectSelectionType.REGULAR_BBOX,
                         )
-                        # self._logger.debug(f"DIOGO - after set selection type")
 
                         try:
-                            # self._logger.debug(f"DIOGO - before set UUID")
                             nvds_set_obj_uid(
                                 frame_meta=nvds_frame_meta,
                                 obj_meta=nvds_obj_meta,
                             )
-                            # self._logger.debug(f"DIOGO - after set UUID")
                         except UIDError:
-                            # self._logger.debug(f"DIOGO - set UUID error")
                             pass
-                        # self._logger.debug(f"DIOGO - before set object key")
                         nvds_obj_meta.obj_label = build_model_object_key(
                             self._element_name, obj.label
                         )
-                        # self._logger.debug(f"DIOGO - Updated regular detector output object loop!!!!!!!!!!!!!!!!!!! AAAAAAAAAAAAA {nvds_obj_meta.obj_label=} - {nvds_obj_meta.class_id=} - {obj.label=} - {self._element_name=}")
 
-                        if self._is_instance_segmentation_model:
-                            mask_params = nvds_obj_meta.mask_params
-
-                            # self._logger.debug(f"DIOGO - mask {dir(mask_params)=}")
-                            # self._logger.debug(f"DIOGO - mask {mask_params=}")
-                            # self._logger.debug(f"DIOGO - mask {mask_params.get_mask_array().shape=}")
-                            # self._logger.debug(f"DIOGO - mask {mask_params.get_mask_array()=}")
+                        if self._is_complex_model and self._model.output.output_instance_mask:
                             nvds_add_attr_meta_to_obj(
                                 frame_meta=nvds_frame_meta,
                                 obj_meta=nvds_obj_meta,
                                 element_name=self._element_name,
                                 name="mask",
-                                value=mask_params.get_mask_array().tolist(),
-                                # value=",".join(map(str, mask_params.get_mask_array())),
+                                value=nvds_obj_meta.mask_params.get_mask_array().tolist(),
                                 confidence=1.0,
                             )
 
