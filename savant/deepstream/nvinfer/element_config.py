@@ -526,6 +526,9 @@ def nvinfer_element_configurator(
     else:
         nvinfer_config['property']['output-tensor-meta'] = 0
 
+        if issubclass(model_type, ComplexModel) and model_config.output.output_instance_mask:
+            nvinfer_config['property']['output-instance-mask'] = 1
+
         # classifier
         if issubclass(model_type, AttributeModel):
             nvinfer_config['property']['network-type'] = (
@@ -552,10 +555,6 @@ def nvinfer_element_configurator(
             nvinfer_config['property']['network-type'] = NvInferModelType.DETECTOR.value
             # set NMS clustering (so far only this one is supported)
             nvinfer_config['property']['cluster-mode'] = 2
-
-    # # nvinfer_config['property']['output-tensor-meta'] = 1
-    # nvinfer_config['property']['network-type'] = NvInferModelType.INSTANCE_SEGMENTATION.value
-    # nvinfer_config['property']['cluster-mode'] = 4
 
     if module_config.parameters.dev_mode:
         if model_config.input.preprocess_object_meta:

@@ -346,6 +346,8 @@ class ComplexModelOutput(ObjectModelOutput, AttributeModelOutput):
     Converter is used to transform raw tensor output into Savant data format.
     """
 
+    output_instance_mask: bool = False
+
 
 @dataclass
 class Model:
