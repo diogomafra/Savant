@@ -526,6 +526,9 @@ def nvinfer_element_configurator(
     else:
         nvinfer_config['property']['output-tensor-meta'] = 0
 
+        if issubclass(model_type, ComplexModel) and model_config.output.output_instance_mask:
+            nvinfer_config['property']['output-instance-mask'] = 1
+
         # classifier
         if issubclass(model_type, AttributeModel):
             nvinfer_config['property']['network-type'] = (

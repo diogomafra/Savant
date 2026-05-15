@@ -341,9 +341,12 @@ class ComplexModelOutput(ObjectModelOutput, AttributeModelOutput):
     :py:class:`.AttributeModelOutput`.
     """
 
-    converter: PyFunc = MISSING
-    """Model output converter is required for complex model.
-    Converter is used to transform raw tensor output into Savant data format.
+    converter: Optional[PyFunc] = None
+    """Converter is used to transform raw tensor output into Savant data format.
+    """
+
+    output_instance_mask: bool = False
+    """Indicates whether the model output should include instance masks.
     """
 
 

@@ -134,6 +134,9 @@ class NvInferProcessor:
         elif self._is_attribute_model:
             self.postproc = self._process_regular_classifier_output
 
+        elif self._is_complex_model:
+            self.postproc = self._process_regular_detector_output
+
     def _preprocess_object_meta(self, buffer: Gst.Buffer):
         """Preprocesses input object metadata."""
         self._logger.debug(
@@ -523,6 +526,17 @@ class NvInferProcessor:
                         nvds_obj_meta.obj_label = build_model_object_key(
                             self._element_name, obj.label
                         )
+
+                        if self._is_complex_model and self._model.output.output_instance_mask:
+                            nvds_add_attr_meta_to_obj(
+                                frame_meta=nvds_frame_meta,
+                                obj_meta=nvds_obj_meta,
+                                element_name=self._element_name,
+                                name="mask",
+                                value=nvds_obj_meta.mask_params.get_mask_array(),
+                                confidence=1.0,
+                            )
+
         self._restore_frame(buffer)
 
     def _process_regular_classifier_output(self, buffer: Gst.Buffer):
