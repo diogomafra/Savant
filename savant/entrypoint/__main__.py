@@ -27,6 +27,12 @@ if __name__ == '__main__':
         help='builds module model\'s engines and exit',
     )
     parser.add_argument(
+        '-em',
+        '--build-engines-if-missing',
+        action='store_true',
+        help='builds module model\'s engines if they are missing and exit',
+    )
+    parser.add_argument(
         'config',
         nargs='?',
         type=argparse.FileType('r'),
@@ -40,6 +46,8 @@ if __name__ == '__main__':
         exit(0)
 
     if args.build_engines:
-        build_module_engines(args.config)
+        build_module_engines(args.config, rebuild=True)
+    elif args.build_engines_if_missing:
+        build_module_engines(args.config, rebuild=False)
     else:
         main(args.config)

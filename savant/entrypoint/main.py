@@ -114,10 +114,11 @@ def main(module_config: Union[str, Path, IO[Any]]):
         exit(1)
 
 
-def build_module_engines(module_config: Union[str, Path, IO[Any]]):
+def build_module_engines(module_config: Union[str, Path, IO[Any]], rebuild: bool = True):
     """Builds module model's engines.
 
     :param module_config: Module configuration.
+    :param rebuild: Flag to force regeneration if the engine already exists. Defaults to True.
     """
 
     # To gracefully shut down the adapter on SIGTERM (raise KeyboardInterrupt)
@@ -161,7 +162,7 @@ def build_module_engines(module_config: Union[str, Path, IO[Any]]):
     for element in nvinfer_elements:
         logger.info('Start building of the "%s" model engine.', element.name)
         try:
-            build_engine(element)
+            build_engine(element, rebuild)
             logger.info(
                 'Successfully complete the engine building of the "%s" model.',
                 element.name,
